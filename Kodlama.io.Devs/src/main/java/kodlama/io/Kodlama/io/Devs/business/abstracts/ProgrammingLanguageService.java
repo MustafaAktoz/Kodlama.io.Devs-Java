@@ -1,0 +1,13 @@
+package kodlama.io.Kodlama.io.Devs.business.abstracts;
+
+import java.util.List;
+
+import kodlama.io.Kodlama.io.Devs.entities.concretes.ProgrammingLanguage;
+
+public interface ProgrammingLanguageService {
+	ProgrammingLanguage create(ProgrammingLanguage programmingLanguage) throws Exception;
+	ProgrammingLanguage update(ProgrammingLanguage programmingLanguage) throws Exception;
+	ProgrammingLanguage delete(ProgrammingLanguage programmingLanguage);
+	ProgrammingLanguage getById(int id);
+	List<ProgrammingLanguage> getAll();
+}
