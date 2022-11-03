@@ -1,8 +1,9 @@
 package kodlama.io.Kodlama.io.Devs.business.concretes;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
+import org.modelmapper.ModelMapper;
+import org.modelmapper.TypeToken;
 import org.springframework.stereotype.Service;
 
 import kodlama.io.Kodlama.io.Devs.business.abstracts.ProgrammingLanguageService;
@@ -23,9 +24,12 @@ import kodlama.io.Kodlama.io.Devs.entities.concretes.ProgrammingLanguage;
 public class ProgrammingLanguageManager implements ProgrammingLanguageService{
 
 	private ProgrammingLanguageRepository programmingLanguageRepository;
+	private ModelMapper modelMapper;
 	
-	public ProgrammingLanguageManager(ProgrammingLanguageRepository programmingLanguageRepository) {
+
+	public ProgrammingLanguageManager(ProgrammingLanguageRepository programmingLanguageRepository, ModelMapper modelMapper) {
 		this.programmingLanguageRepository = programmingLanguageRepository;
+		this.modelMapper = modelMapper;
 	}
 
 	@Override
@@ -33,14 +37,11 @@ public class ProgrammingLanguageManager implements ProgrammingLanguageService{
 		nameCannotBeDuplicated(createProgrammingLanguageRequest.getName());
 		nameCannotBeBlank(createProgrammingLanguageRequest.getName());
 		
-		ProgrammingLanguage programmingLanguage = new ProgrammingLanguage();
-		programmingLanguage.setName(createProgrammingLanguageRequest.getName());
+		ProgrammingLanguage programmingLanguage = modelMapper.map(createProgrammingLanguageRequest, ProgrammingLanguage.class);
 		ProgrammingLanguage saveProgrammingLanguageResult = programmingLanguageRepository.save(programmingLanguage);
 		
-		CreateProgrammingLanguageResponse createProgrammingLanguageResponse = new CreateProgrammingLanguageResponse();
-		createProgrammingLanguageResponse.setId(saveProgrammingLanguageResult.getId());
-		createProgrammingLanguageResponse.setName(saveProgrammingLanguageResult.getName());
-		return createProgrammingLanguageResponse;
+		CreateProgrammingLanguageResponse createProgrammingLanguageResponse = modelMapper.map(saveProgrammingLanguageResult, CreateProgrammingLanguageResponse.class);
+		return 	createProgrammingLanguageResponse;
 	}
 
 	@Override
@@ -48,47 +49,39 @@ public class ProgrammingLanguageManager implements ProgrammingLanguageService{
 		nameCannotBeDuplicated(updateProgrammingLanguageRequest.getName());
 		nameCannotBeBlank(updateProgrammingLanguageRequest.getName());
 		
-		ProgrammingLanguage programmingLanguage = new ProgrammingLanguage();
-		programmingLanguage.setId(updateProgrammingLanguageRequest.getId());
-		programmingLanguage.setName(updateProgrammingLanguageRequest.getName());
+		ProgrammingLanguage programmingLanguage = modelMapper.map(updateProgrammingLanguageRequest, ProgrammingLanguage.class);
 		ProgrammingLanguage saveProgrammingLanguageResult = programmingLanguageRepository.save(programmingLanguage);
 		
-		UpdateProgrammingLanguageResponse updateProgrammingLanguageResponse = new UpdateProgrammingLanguageResponse();
-		updateProgrammingLanguageResponse.setId(saveProgrammingLanguageResult.getId());
-		updateProgrammingLanguageResponse.setName(saveProgrammingLanguageResult.getName());
+		UpdateProgrammingLanguageResponse updateProgrammingLanguageResponse = modelMapper.map(saveProgrammingLanguageResult, UpdateProgrammingLanguageResponse.class);
 		return updateProgrammingLanguageResponse;
 	}
 
 	@Override
 	public DeleteProgrammingLanguageResponse delete(DeleteProgrammingLanguageRequest deleteProgrammingLanguageRequest) {
-		ProgrammingLanguage programmingLanguage = programmingLanguageRepository.getReferenceById(deleteProgrammingLanguageRequest.getId());
-		programmingLanguageRepository.delete(programmingLanguage);
+		ProgrammingLanguage getReferenceByIdProgrammingLanguageResult = programmingLanguageRepository.getReferenceById(deleteProgrammingLanguageRequest.getId());
+		programmingLanguageRepository.delete(getReferenceByIdProgrammingLanguageResult);
 		
-		DeleteProgrammingLanguageResponse deleteProgrammingLanguageResponse = new DeleteProgrammingLanguageResponse();
-		deleteProgrammingLanguageResponse.setId(programmingLanguage.getId());
-		deleteProgrammingLanguageResponse.setName(programmingLanguage.getName());
+		DeleteProgrammingLanguageResponse deleteProgrammingLanguageResponse = modelMapper.map(getReferenceByIdProgrammingLanguageResult, DeleteProgrammingLanguageResponse.class);
 		return deleteProgrammingLanguageResponse;
 	}
 
 	@Override
 	public GetByIdProgrammingLanguageResponse getById(GetByIdProgrammingLanguageRequest getByIdProgrammingLanguageRequest) {
-		ProgrammingLanguage programmingLanguage = programmingLanguageRepository.getReferenceById(getByIdProgrammingLanguageRequest.getId());
+		ProgrammingLanguage getReferenceByIdProgrammingLanguageResult = programmingLanguageRepository.getReferenceById(getByIdProgrammingLanguageRequest.getId());
 		
-		GetByIdProgrammingLanguageResponse getByIdProgrammingLanguageResponse = new GetByIdProgrammingLanguageResponse();
-		getByIdProgrammingLanguageResponse.setId(programmingLanguage.getId());
-		getByIdProgrammingLanguageResponse.setName(programmingLanguage.getName());
+		GetByIdProgrammingLanguageResponse getByIdProgrammingLanguageResponse = modelMapper.map(getReferenceByIdProgrammingLanguageResult, GetByIdProgrammingLanguageResponse.class);
 		return getByIdProgrammingLanguageResponse;
 	}
 
 	@Override
 	public List<GetAllProgrammingLanguageResponse> getAll() {
-		List<ProgrammingLanguage> programmingLanguages = programmingLanguageRepository.findAll();
-		return programmingLanguages.stream().map(pl-> new GetAllProgrammingLanguageResponse(pl.getId(),pl.getName())).collect(Collectors.toList());
+		List<ProgrammingLanguage> findAllProgrammingLanguageResult = programmingLanguageRepository.findAll();
+		return modelMapper.map(findAllProgrammingLanguageResult, new TypeToken<List<GetAllProgrammingLanguageResponse>>() {}.getType());
 	}
 
 	private void nameCannotBeDuplicated(String name) throws Exception {
-		ProgrammingLanguage programmingLanguage = programmingLanguageRepository.getByName(name);
-		if(programmingLanguage != null) throw new Exception(Messages.PROGRAMMING_LANGUAGE_NAME_ALREADY_EXISTS);
+		ProgrammingLanguage getByNameProgrammingLanguageResult = programmingLanguageRepository.getByName(name);
+		if(getByNameProgrammingLanguageResult != null) throw new Exception(Messages.PROGRAMMING_LANGUAGE_NAME_ALREADY_EXISTS);
 	}
 	
 	//Technical Debt
